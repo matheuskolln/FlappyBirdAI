@@ -1,5 +1,5 @@
 # FlappyBirdAI
-Flappy bird game who uses NEAT to play. Inspired in the channel Tech with Tim(youtube.com/techwithtim).
+Flappy Bird game that uses NEAT to play. Inspired by the Tech with Tim channel (youtube.com/techwithtim).
 
 # Running game
 ![ezgif-6-6dbbf4f41c15](https://user-images.githubusercontent.com/50464577/69905646-99d2b800-1395-11ea-9164-7166860d7d54.gif)
