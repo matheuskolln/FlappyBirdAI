@@ -11,16 +11,18 @@ import pygame
 import neat
 import os
 import random
+
 pygame.font.init()
 
 WIN_WIDTH = 500
 WIN_HEIGHT = 800
-
 GEN = 0
 
-BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird1.png"))),
-             pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird2.png"))),
-             pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png")))]
+BIRD_IMGS = [
+    pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird1.png"))),
+    pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird2.png"))),
+    pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png"))),
+]
 PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "pipe.png")))
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "base.png")))
 BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
@@ -32,12 +34,12 @@ class Bird:
     """
     Classe que representa o Flappy Bird
     """
+
     IMGS = BIRD_IMGS
     MAX_ROTATION = 25
     ROT_VEL = 20
     ANIMATION_TIME = 5
-    
-    
+
     def __init__(self, x, y):
         """
         Inicializa o objeto
@@ -71,7 +73,7 @@ class Bird:
         self.tick_count += 1
 
         # Aceleração para baixo
-        displacement = self.vel*self.tick_count + 1.5*self.tick_count**2
+        displacement = self.vel * self.tick_count + 1.5 * self.tick_count ** 2
 
         # Velocidade terminal
         if displacement >= 16:
@@ -79,16 +81,16 @@ class Bird:
 
         if displacement < 0:
             displacement == 2
-        
+
         self.y = self.y + displacement
-            
-        if displacement < 0  or self.y < self.height + 50:
+
+        if displacement < 0 or self.y < self.height + 50:
             if self.tilt < self.MAX_ROTATION:
                 self.tilt = self.MAX_ROTATION
         else:
             if self.tilt > -90:
                 self.tilt -= self.ROT_VEL
-    
+
     def draw(self, win):
         """
         Paramêtro win: Pygame window ou surface
@@ -99,24 +101,26 @@ class Bird:
         # Faz com que o pássaro tenha animação no seu movimento, utilizando um loop de 3 imagens
         if self.img_count < self.ANIMATION_TIME:
             self.img = self.IMGS[0]
-        elif self.img_count < self.ANIMATION_TIME*2:
+        elif self.img_count < self.ANIMATION_TIME * 2:
             self.img = self.IMGS[1]
-        elif self.img_count < self.ANIMATION_TIME*3:
+        elif self.img_count < self.ANIMATION_TIME * 3:
             self.img = self.IMGS[2]
-        elif self.img_count < self.ANIMATION_TIME*4:
+        elif self.img_count < self.ANIMATION_TIME * 4:
             self.img = self.IMGS[1]
-        elif self.img_count == self.ANIMATION_TIME*4 + 1:
+        elif self.img_count == self.ANIMATION_TIME * 4 + 1:
             self.img = self.IMGS[0]
             self.img_count = 0
 
         # Define que o pássaro não baterá as asas quando estiver caindo
         if self.tilt <= -80:
             self.img = self.IMGS[1]
-            self.img_count = self.ANIMATION_TIME*2
+            self.img_count = self.ANIMATION_TIME * 2
 
         # Inclina o pássaro
         rotated_image = pygame.transform.rotate(self.img, self.tilt)
-        new_rect = rotated_image.get_rect(center=self.img.get_rect(topleft = (self.x, self.y)).center)
+        new_rect = rotated_image.get_rect(
+            center=self.img.get_rect(topleft=(self.x, self.y)).center
+        )
         win.blit(rotated_image, new_rect.topleft)
 
     def get_mask(self):
@@ -126,10 +130,12 @@ class Bird:
         """
         return pygame.mask.from_surface(self.img)
 
+
 class Pipe:
     """
     Classe que representa o objeto cano
     """
+
     GAP = 150
     VEL = 5
 
@@ -151,7 +157,7 @@ class Pipe:
         self.PIPE_BOTTOM = PIPE_IMG
 
         self.passed = False
-        
+
         self.set_height()
 
     def set_height(self):
@@ -194,9 +200,9 @@ class Pipe:
         top_offset = (self.x - bird.x, self.top - round(bird.y))
         bottom_offset = (self.x - bird.x, self.bottom - round(bird.y))
 
-        b_point  = bird_mask.overlap(bottom_mask, bottom_offset)
-        t_point  = bird_mask.overlap(top_mask, top_offset)
-        
+        b_point = bird_mask.overlap(bottom_mask, bottom_offset)
+        t_point = bird_mask.overlap(top_mask, top_offset)
+
         if t_point or b_point:
             return True
 
@@ -207,6 +213,7 @@ class Base:
     """
     Representa o chão que se move no jogo
     """
+
     VEL = 5
     WIDTH = BASE_IMG.get_width()
     IMG = BASE_IMG
@@ -231,7 +238,7 @@ class Base:
 
         if self.x1 + self.WIDTH < 0:
             self.x1 = self.x2 + self.WIDTH
-        
+
         if self.x2 + self.WIDTH < 0:
             self.x2 = self.x1 + self.WIDTH
 
@@ -267,7 +274,7 @@ def draw_window(win, birds, pipes, base, score, gen):
     # Pontuação do melhor pássaro da geração
     text = STAT_FONT.render("Score: " + str(score), 1, (255, 255, 255))
     win.blit(text, (10, 70))
-    
+
     # Quantidade de pássaros vivo da geração
     text = STAT_FONT.render(f"Alive: {len(birds)}/20", 1, (255, 255, 255))
     win.blit(text, (10, 130))
@@ -287,26 +294,24 @@ def main(genomes, config):
     GEN += 1
 
     # Começa criando listas que contém o próprio genoma
-    # e a rede neural associada ao genoma e o objeto de 
+    # e a rede neural associada ao genoma e o objeto de
     # pássaro que utiliza desta rede para jogar
     nets = []
     ge = []
     birds = []
 
-
     for genome_id, genome in genomes:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         nets.append(net)
         birds.append(Bird(230, 350))
-        genome.fitness = 0 # Começa com o nível de fitness igual a 0
+        genome.fitness = 0  # Começa com o nível de fitness igual a 0
         ge.append(genome)
-
 
     base = Base(730)
     pipes = [Pipe(600)]
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
-    
+
     score = 0
 
     run = True
@@ -320,22 +325,33 @@ def main(genomes, config):
 
         pipe_ind = 0
         if len(birds) > 0:
-            if len(pipes) > 1 and birds[0].x > pipes[0].x + pipes[0].PIPE_TOP.get_width(): # Determina se usa o primeiro ou o segundo
-                pipe_ind = 1                                                               # cano na tela para o input da rede neural
+            if (
+                len(pipes) > 1
+                and birds[0].x > pipes[0].x + pipes[0].PIPE_TOP.get_width()
+            ):  # Determina se usa o primeiro ou o segundo
+                pipe_ind = 1  # cano na tela para o input da rede neural
         else:
             run = False
             break
 
-        for x, bird in enumerate(birds): # Dá para cada pássaro 0.1 de fitness por frame que permanece vivo
+        for x, bird in enumerate(
+            birds
+        ):  # Dá para cada pássaro 0.1 de fitness por frame que permanece vivo
             bird.move()
             ge[x].fitness += 0.1
 
             # Manda a localização do pássaro, localização do topo do cano, base do cano e determinado pela rede neural pula ou não
-            output = nets[x].activate((bird.y, abs(bird.y - pipes[pipe_ind].height), abs(bird.y - pipes[pipe_ind].bottom)))
+            output = nets[x].activate(
+                (
+                    bird.y,
+                    abs(bird.y - pipes[pipe_ind].height),
+                    abs(bird.y - pipes[pipe_ind].bottom),
+                )
+            )
 
             if output[0] > 0.5:
                 bird.jump()
- 
+
         add_pipe = False
         rem = []
         for pipe in pipes:
@@ -345,11 +361,11 @@ def main(genomes, config):
                     birds.pop(x)
                     nets.pop(x)
                     ge.pop(x)
-                    
+
                 if not pipe.passed and pipe.x < bird.x:
                     pipe.passed = True
                     add_pipe = True
-            
+
             if pipe.x + pipe.PIPE_TOP.get_width() < 0:
                 rem.append(pipe)
 
@@ -368,7 +384,7 @@ def main(genomes, config):
                 birds.pop(x)
                 nets.pop(x)
                 ge.pop(x)
-                
+
         base.move()
         draw_window(win, birds, pipes, base, score, GEN)
 
@@ -379,15 +395,19 @@ def run(config_file):
     Paramêtro config_file: Localização do arquivo de configuração
     Sem retorno
     """
-    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_file)
- 
-    # Cria a população, que é o objeto de maior nível para execução NEAT                     
+    config = neat.config.Config(
+        neat.DefaultGenome,
+        neat.DefaultReproduction,
+        neat.DefaultSpeciesSet,
+        neat.DefaultStagnation,
+        config_file,
+    )
+
+    # Cria a população, que é o objeto de maior nível para execução NEAT
     p = neat.Population(config)
 
     # Adiciona um stdout reporter para mostrar o progresso no terminal.
-    p.add_reporter(neat.StdOutReporter())
+    p.add_reporter(neat.StdOutReporter(show_species_detail=True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
@@ -395,7 +415,8 @@ def run(config_file):
     winner = p.run(main, 50)
 
     # Mostra as estatísticas finais
-    print('\nBest genome:\n{!s}'.format(winner))
+    print("\nBest genome:\n{!s}".format(winner))
+
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
