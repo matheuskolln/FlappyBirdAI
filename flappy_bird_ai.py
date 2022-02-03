@@ -8,14 +8,13 @@ Autor/Author: Matheus Henrique Kolln Nagildo
 """
 
 from entities.base import Base
-from entities.bird import Bird
+from entities.infra.bird import Bird
 import pygame
 import neat
 import os
 
 from entities.pipe import Pipe
 from helpers.draw_window import draw_window
-
 
 
 WIN_WIDTH = 500
