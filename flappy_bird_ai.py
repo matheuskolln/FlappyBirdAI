@@ -7,7 +7,7 @@ Autor/Author: Matheus Henrique Kolln Nagildo
 Última modificação/Last modification: 30/11/2019
 """
 
-from entities.base import Base
+from entities.infra.base import Base
 from entities.infra.bird import Bird
 import pygame
 import neat
