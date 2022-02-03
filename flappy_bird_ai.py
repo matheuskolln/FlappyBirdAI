@@ -16,7 +16,7 @@ import os
 from entities.pipe import Pipe
 from helpers.draw_window import draw_window
 
-pygame.font.init()
+
 
 WIN_WIDTH = 500
 WIN_HEIGHT = 800
@@ -118,7 +118,7 @@ def main(genomes, config):
         for r in rem:
             pipes.remove(r)
         for x, bird in enumerate(birds):
-            if bird.y + bird.img.get_height() >= 730 or bird.y < 0:
+            if bird.y + bird.image.get_height() >= 730 or bird.y < 0:
                 birds.pop(x)
                 nets.pop(x)
                 ge.pop(x)

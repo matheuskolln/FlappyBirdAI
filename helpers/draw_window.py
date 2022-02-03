@@ -1,6 +1,7 @@
 import os
 import pygame
 
+pygame.font.init()
 
 BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
 
