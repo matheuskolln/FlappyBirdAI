@@ -9,6 +9,8 @@ BIRD_IMGS = [
     pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png"))),
 ]
 
+MAX_POSSIBLE_IMAGE_INDEX = len(BIRD_IMGS) - 1
+
 MAX_ROTATION = 25
 ROTATION_SPEED = 20
 ANIMATION_TIME = 5
@@ -39,31 +41,10 @@ class Bird(IBird):
         self._manage_inclination(displacement)
 
     def draw(self, win):
-        """
-        Paramêtro win: Pygame window ou surface
-        Sem retorno
-        """
         self.image_count += 1
+        image_index = self._get_image_index()
+        self.image = BIRD_IMGS[image_index]
 
-        # Faz com que o pássaro tenha animação no seu movimento, utilizando um loop de 3 imagens
-        if self.image_count < ANIMATION_TIME:
-            self.image = BIRD_IMGS[0]
-        elif self.image_count < ANIMATION_TIME * 2:
-            self.image = BIRD_IMGS[1]
-        elif self.image_count < ANIMATION_TIME * 3:
-            self.image = BIRD_IMGS[2]
-        elif self.image_count < ANIMATION_TIME * 4:
-            self.image = BIRD_IMGS[1]
-        elif self.image_count == ANIMATION_TIME * 4 + 1:
-            self.image = BIRD_IMGS[0]
-            self.image_count = 0
-
-        # Define que o pássaro não baterá as asas quando estiver caindo
-        if self.inclination <= -80:
-            self.image = BIRD_IMGS[1]
-            self.image_count = ANIMATION_TIME * 2
-
-        # Inclina o pássaro
         rotated_image = pygame.transform.rotate(self.image, self.inclination)
         new_rect = rotated_image.get_rect(
             center=self.image.get_rect(topleft=(self.x, self.y)).center
@@ -71,10 +52,6 @@ class Bird(IBird):
         win.blit(rotated_image, new_rect.topleft)
 
     def get_mask(self):
-        """
-        Recebe a mask para a imagem atual do pássaro
-        Sem retorno
-        """
         return pygame.mask.from_surface(self.image)
 
     def _get_displacement(self) -> float:
@@ -99,3 +76,25 @@ class Bird(IBird):
         else:
             if self.inclination > -90:
                 self.inclination -= ROTATION_SPEED
+
+    def _get_image_index(self) -> int:
+        if self.inclination <= -80:
+            self.image_count = ANIMATION_TIME * 2
+            return 1
+
+        intervals_for_image_count = [
+            number for number in range(0, ANIMATION_TIME * 4, ANIMATION_TIME)
+        ]
+
+        format_index_to_image_index = (
+            lambda index: index
+            if index <= MAX_POSSIBLE_IMAGE_INDEX
+            else index - MAX_POSSIBLE_IMAGE_INDEX
+        )
+
+        for index in range(0, len(intervals_for_image_count)):
+            if self.image_count <= intervals_for_image_count[index]:
+                return format_index_to_image_index(index)
+
+        self.image_count = 0
+        return 0
