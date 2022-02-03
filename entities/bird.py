@@ -44,12 +44,7 @@ class Bird(IBird):
         self.image_count += 1
         image_index = self._get_image_index()
         self.image = BIRD_IMGS[image_index]
-
-        rotated_image = pygame.transform.rotate(self.image, self.inclination)
-        new_rect = rotated_image.get_rect(
-            center=self.image.get_rect(topleft=(self.x, self.y)).center
-        )
-        win.blit(rotated_image, new_rect.topleft)
+        self._draw_image(win)
 
     def get_mask(self):
         return pygame.mask.from_surface(self.image)
@@ -98,3 +93,10 @@ class Bird(IBird):
 
         self.image_count = 0
         return 0
+
+    def _draw_image(self, win) -> None:
+        rotated_image = pygame.transform.rotate(self.image, self.inclination)
+        new_rect = rotated_image.get_rect(
+            center=self.image.get_rect(topleft=(self.x, self.y)).center
+        )
+        win.blit(rotated_image, new_rect.topleft)
