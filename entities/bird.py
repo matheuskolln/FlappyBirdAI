@@ -34,17 +34,9 @@ class Bird(IBird):
 
     def move(self) -> None:
         self.tick_count += 1
-
         displacement = self._manage_displacement()
-
         self.y = self.y + displacement
-
-        if displacement < 0 or self.y < self.y + 50 - displacement:
-            if self.inclination < MAX_ROTATION:
-                self.inclination = MAX_ROTATION
-        else:
-            if self.inclination > -90:
-                self.inclination -= ROTATION_SPEED
+        self._manage_inclination(displacement)
 
     def draw(self, win):
         """
@@ -99,3 +91,11 @@ class Bird(IBird):
             displacement == 2
 
         return displacement
+
+    def _manage_inclination(self, displacement: float) -> None:
+        if displacement < 0 or self.y < self.y + 50 - displacement:
+            if self.inclination < MAX_ROTATION:
+                self.inclination = MAX_ROTATION
+        else:
+            if self.inclination > -90:
+                self.inclination -= ROTATION_SPEED
