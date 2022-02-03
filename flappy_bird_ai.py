@@ -13,7 +13,7 @@ import pygame
 import neat
 import os
 
-from entities.pipe import PIPE_TOP_IMG, Pipe
+from entities.infra.pipe import PIPE_TOP_IMG, Pipe
 from helpers.draw_window import draw_window
 
 

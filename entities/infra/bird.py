@@ -40,13 +40,13 @@ class Bird(IBird):
         self.y = self.y + displacement
         self._manage_inclination(displacement)
 
-    def draw(self, win):
+    def draw(self, win) -> None:
         self.image_count += 1
         image_index = self._get_image_index()
         self.image = BIRD_IMGS[image_index]
         self._draw_image(win)
 
-    def get_mask(self):
+    def get_mask(self) -> pygame.mask.Mask:
         return pygame.mask.from_surface(self.image)
 
     def _get_displacement(self) -> float:
