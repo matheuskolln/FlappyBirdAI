@@ -13,7 +13,7 @@ import pygame
 import neat
 import os
 
-from entities.pipe import Pipe
+from entities.pipe import PIPE_TOP_IMG, Pipe
 from helpers.draw_window import draw_window
 
 
@@ -63,8 +63,7 @@ def main(genomes, config):
         pipe_ind = 0
         if len(birds) > 0:
             if (
-                len(pipes) > 1
-                and birds[0].x > pipes[0].x + pipes[0].PIPE_TOP.get_width()
+                len(pipes) > 1 and birds[0].x > pipes[0].x + PIPE_TOP_IMG.get_width()
             ):  # Determina se usa o primeiro ou o segundo
                 pipe_ind = 1  # cano na tela para o input da rede neural
         else:
@@ -103,7 +102,7 @@ def main(genomes, config):
                     pipe.passed = True
                     add_pipe = True
 
-            if pipe.x + pipe.PIPE_TOP.get_width() < 0:
+            if pipe.x + PIPE_TOP_IMG.get_width() < 0:
                 rem.append(pipe)
 
             pipe.move()
