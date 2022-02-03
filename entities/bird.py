@@ -1,6 +1,8 @@
 import pygame
 import os
 
+from entities.domain.bird import IBird
+
 BIRD_IMGS = [
     pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird1.png"))),
     pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird2.png"))),
@@ -11,37 +13,31 @@ MAX_ROTATION = 25
 ROTATION_SPEED = 20
 ANIMATION_TIME = 5
 
+SPEED_TO_DECREASE_WHEN_JUMP = -10.5
 
-class Bird:
-    def __init__(self, x, y):
-        """
-        Inicializa o objeto
-        Paramêtro x: posição inicial em x(int)
-        Paramêtro y: posição inicial em y(int)
-        Sem retorno
-        """
+
+class Bird(IBird):
+
+    inclination = 0
+    tick_count = 0
+    image_count = 0
+    image = BIRD_IMGS[0]
+
+    def __init__(self, x: float, y: float) -> None:
+        self.speed = 0
         self.x = x
         self.y = y
-        self.inclination = 0
-        self.tick_count = 0
-        self.speed = 0
         self.height = self.y
-        self.image_count = 0
-        self.image = BIRD_IMGS[0]
 
-    def jump(self):
-        """
-        Faz com que o pássaro "pule"
-        Sem retorno
-        """
-        self.speed = -10.5
+    def jump(self) -> None:
+        self.speed = SPEED_TO_DECREASE_WHEN_JUMP
         self.tick_count = 0
         self.height = self.y
 
-    def move(self):
+    def move(self) -> None:
         self.tick_count += 1
 
-        displacement = self.speed * self.tick_count + 1.5 * self.tick_count**2
+        displacement = self._get_displacement()
 
         # Velocidade terminal
         if displacement >= 16:
@@ -97,3 +93,7 @@ class Bird:
         Sem retorno
         """
         return pygame.mask.from_surface(self.image)
+
+    def _get_displacement(self) -> float:
+        displacement = self.speed * self.tick_count + 1.5 * self.tick_count**2
+        return displacement
