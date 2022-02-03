@@ -27,12 +27,10 @@ class Bird(IBird):
         self.speed = 0
         self.x = x
         self.y = y
-        self.height = self.y
 
     def jump(self) -> None:
         self.speed = SPEED_TO_DECREASE_WHEN_JUMP
         self.tick_count = 0
-        self.height = self.y
 
     def move(self) -> None:
         self.tick_count += 1
@@ -48,7 +46,7 @@ class Bird(IBird):
 
         self.y = self.y + displacement
 
-        if displacement < 0 or self.y < self.height + 50:
+        if displacement < 0 or self.y < self.y + 50 - displacement:
             if self.inclination < MAX_ROTATION:
                 self.inclination = MAX_ROTATION
         else:
