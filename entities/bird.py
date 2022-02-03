@@ -35,14 +35,7 @@ class Bird(IBird):
     def move(self) -> None:
         self.tick_count += 1
 
-        displacement = self._get_displacement()
-
-        # Velocidade terminal
-        if displacement >= 16:
-            displacement = 16
-
-        if displacement < 0:
-            displacement == 2
+        displacement = self._manage_displacement()
 
         self.y = self.y + displacement
 
@@ -94,4 +87,15 @@ class Bird(IBird):
 
     def _get_displacement(self) -> float:
         displacement = self.speed * self.tick_count + 1.5 * self.tick_count**2
+        return displacement
+
+    def _manage_displacement(self) -> float:
+        displacement = self._get_displacement()
+
+        if displacement >= 16:
+            displacement = 16
+
+        if displacement < 0:
+            displacement == 2
+
         return displacement
