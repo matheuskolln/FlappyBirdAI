@@ -25,16 +25,3 @@ class Base(IBase):
     def _decrease_speed(self) -> None:
         self.initial_x -= SPEED
         self.final_x -= SPEED
-
-    def _manage_x_coordinates(self) -> None:
-        self.initial_x += (
-            self.final_x + WIDTH if self._is_out_of_screen(self.initial_x) < 0 else 0
-        )
-        self.final_x += (
-            self.initial_x + WIDTH
-            if self._is_out_of_screen(self.initial_x) + WIDTH < 0
-            else 0
-        )
-
-    def _is_out_of_screen(self, x) -> bool:
-        return x + WIDTH < 0
