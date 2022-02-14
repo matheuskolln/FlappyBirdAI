@@ -7,6 +7,7 @@ Autor/Author: Matheus Henrique Kolln Nagildo
 Última modificação/Last modification: 30/11/2019
 """
 
+from typing import List
 from entities.infra.base import Base
 from entities.infra.bird import Bird
 import pygame
@@ -21,116 +22,123 @@ WIN_WIDTH = 500
 WIN_HEIGHT = 800
 GEN = 0
 
+MAX_GEN = 50
+SCORE_TO_STOP = 20
 
-def main(genomes, config):
-    """
-    Roda a simulação da população atual de pássaros e estabelece seu fitness baseado
-    na distância em que eles chegam no jogo
-    """
+
+def should_stop(birds, gen: int, score: int) -> bool:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            return True
+
+    return gen >= MAX_GEN or score >= SCORE_TO_STOP or len(birds) <= 0
+
+
+def bird_passed_pipe(bird_x: float, pipe_x: float) -> bool:
+    return bird_x > pipe_x
+
+
+def should_remove_pipe(pipe_x: float) -> bool:
+    return pipe_x + PIPE_TOP_IMG.get_width() < 0
+
+
+def should_jump(result: float) -> bool:
+    return result > 0.5
+
+
+def get_pipe_index(birds: List[Bird], pipes: List[Pipe]) -> int:
+    return (
+        1
+        if len(birds) > 0
+        and len(pipes) > 1
+        and birds[0].x > pipes[0].x + PIPE_TOP_IMG.get_width()
+        else 0
+    )
+
+
+def main(gens: list, config: neat.config.Config) -> None:
     global GEN
     GEN += 1
 
-    # Começa criando listas que contém o próprio genoma
-    # e a rede neural associada ao genoma e o objeto de
-    # pássaro que utiliza desta rede para jogar
     nets = []
-    ge = []
+    genomes = []
     birds = []
-
-    for genome_id, genome in genomes:
-        net = neat.nn.FeedForwardNetwork.create(genome, config)
-        nets.append(net)
-        birds.append(Bird(230, 350))
-        genome.fitness = 0  # Começa com o nível de fitness igual a 0
-        ge.append(genome)
-
     base = Base(730)
     pipes = [Pipe(600)]
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
-
     score = 0
 
-    run = True
-    while run:
-        clock.tick(30)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                pygame.quit()
-                quit()
+    for _, genome in gens:
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        nets.append(net)
+        birds.append(Bird(230, 350))
+        genome.fitness = 0
+        genomes.append(genome)
 
-        pipe_ind = 0
-        if len(birds) > 0:
-            if (
-                len(pipes) > 1 and birds[0].x > pipes[0].x + PIPE_TOP_IMG.get_width()
-            ):  # Determina se usa o primeiro ou o segundo
-                pipe_ind = 1  # cano na tela para o input da rede neural
-        else:
-            run = False
+    while True:
+        if should_stop(birds, GEN, score):
             break
+        clock.tick(30)
 
-        for x, bird in enumerate(
-            birds
-        ):  # Dá para cada pássaro 0.1 de fitness por frame que permanece vivo
+        pipe_index = get_pipe_index(birds, pipes)
+
+        for genome_index, bird in enumerate(birds):
             bird.move()
-            ge[x].fitness += 0.1
+            genomes[genome_index].fitness += 0.1
 
-            # Manda a localização do pássaro, localização do topo do cano, base do cano e determinado pela rede neural pula ou não
-            output = nets[x].activate(
+            bird_location = bird.y
+            pipe_top_location = bird.y - pipes[pipe_index].height
+            pipe_bottom_location = bird.y - pipes[pipe_index].bottom
+
+            result = nets[genome_index].activate(
                 (
-                    bird.y,
-                    abs(bird.y - pipes[pipe_ind].height),
-                    abs(bird.y - pipes[pipe_ind].bottom),
+                    bird_location,
+                    pipe_top_location,
+                    pipe_bottom_location,
                 )
-            )
+            )[0]
 
-            if output[0] > 0.5:
+            if should_jump(result):
                 bird.jump()
 
-        add_pipe = False
-        rem = []
+        pipes_to_remove = []
         for pipe in pipes:
-            for x, bird in enumerate(birds):
+            for genome_index, bird in enumerate(birds):
                 if pipe.collide(bird):
-                    ge[x].fitness -= 1
-                    birds.pop(x)
-                    nets.pop(x)
-                    ge.pop(x)
+                    genomes[genome_index].fitness -= 1
+                    birds.pop(genome_index)
+                    nets.pop(genome_index)
+                    genomes.pop(genome_index)
 
-                if not pipe.passed and pipe.x < bird.x:
+                if not pipe.passed and bird_passed_pipe(bird.x, pipe.x):
                     pipe.passed = True
-                    add_pipe = True
 
-            if pipe.x + PIPE_TOP_IMG.get_width() < 0:
-                rem.append(pipe)
+                    score += 1
+                    for g in genomes:
+                        g.fitness += 5
+                    pipes.append(Pipe(600))
+
+            if should_remove_pipe(pipe.x):
+                pipes_to_remove.append(pipe)
 
             pipe.move()
 
-        if add_pipe:
-            score += 1
-            for g in ge:
-                g.fitness += 5
-            pipes.append(Pipe(600))
+        for pipe_to_remove in pipes_to_remove:
+            pipes.remove(pipe_to_remove)
 
-        for r in rem:
-            pipes.remove(r)
-        for x, bird in enumerate(birds):
+        for genome_index, bird in enumerate(birds):
             if bird.y + bird.image.get_height() >= 730 or bird.y < 0:
-                birds.pop(x)
-                nets.pop(x)
-                ge.pop(x)
+                birds.pop(genome_index)
+                nets.pop(genome_index)
+                genomes.pop(genome_index)
 
         base.move()
         draw_window(win, birds, pipes, base, score, GEN)
 
 
-def run(config_file):
-    """
-    Roda o algoritmo NEAT para treinar a rede neural que jogará flappy bird
-    Paramêtro config_file: Localização do arquivo de configuração
-    Sem retorno
-    """
+def run(config_file: str) -> None:
     config = neat.config.Config(
         neat.DefaultGenome,
         neat.DefaultReproduction,
@@ -139,18 +147,14 @@ def run(config_file):
         config_file,
     )
 
-    # Cria a população, que é o objeto de maior nível para execução NEAT
-    p = neat.Population(config)
+    population = neat.Population(config)
 
-    # Adiciona um stdout reporter para mostrar o progresso no terminal.
-    p.add_reporter(neat.StdOutReporter(show_species_detail=True))
+    population.add_reporter(neat.StdOutReporter(show_species_detail=True))
     stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
+    population.add_reporter(stats)
 
-    # Roda o jogo até 50 gerações
-    winner = p.run(main, 50)
+    winner = population.run(main, 50)
 
-    # Mostra as estatísticas finais
     print("\nBest genome:\n{!s}".format(winner))
 
 

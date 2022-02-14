@@ -7,7 +7,8 @@ BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png
 
 STAT_FONT = pygame.font.SysFont("Agency FB", 50)
 
-def draw_window(win, birds, pipes, base, score, gen):
+
+def draw_window(win: pygame.Surface, birds, pipes, base, score, gen):
     """
     Coloca as janelas para o jogo
     Paramêtro win: Pygame window surface
