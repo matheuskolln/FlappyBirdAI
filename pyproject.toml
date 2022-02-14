@@ -10,6 +10,8 @@ pygame = "^2.1.2"
 neat-python = "^0.92"
 
 [tool.poetry.dev-dependencies]
+pylint = "^2.12.2"
+mypy = "^0.931"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
