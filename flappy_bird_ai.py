@@ -9,7 +9,7 @@ Autor/Author: Matheus Henrique Kolln Nagildo
 
 from typing import List
 from entities.infra.base import Base
-from entities.infra.bird import Bird
+from entities.infra.bird import BIRD_IMGS, Bird
 import pygame
 import neat
 import os
@@ -26,37 +26,6 @@ MAX_GEN = 50
 SCORE_TO_STOP = 20
 
 
-def should_stop(birds, gen: int, score: int) -> bool:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            return True
-
-    return gen >= MAX_GEN or score >= SCORE_TO_STOP or len(birds) <= 0
-
-
-def bird_passed_pipe(bird_x: float, pipe_x: float) -> bool:
-    return bird_x > pipe_x
-
-
-def should_remove_pipe(pipe_x: float) -> bool:
-    return pipe_x + PIPE_TOP_IMG.get_width() < 0
-
-
-def should_jump(result: float) -> bool:
-    return result > 0.5
-
-
-def get_pipe_index(birds: List[Bird], pipes: List[Pipe]) -> int:
-    return (
-        1
-        if len(birds) > 0
-        and len(pipes) > 1
-        and birds[0].x > pipes[0].x + PIPE_TOP_IMG.get_width()
-        else 0
-    )
-
-
 def main(gens: list, config: neat.config.Config) -> None:
     global GEN
     GEN += 1
@@ -67,8 +36,13 @@ def main(gens: list, config: neat.config.Config) -> None:
     base = Base(730)
     pipes = [Pipe(600)]
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+
     clock = pygame.time.Clock()
     score = 0
+
+
+    pygame.display.set_caption("Flappy Bird AI")
+    pygame.display.set_icon(BIRD_IMGS[0])
 
     for _, genome in gens:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -156,6 +130,37 @@ def run(config_file: str) -> None:
     winner = population.run(main, 50)
 
     print("\nBest genome:\n{!s}".format(winner))
+
+
+def should_stop(birds: List[Bird], gen: int, score: int) -> bool:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            return True
+
+    return gen >= MAX_GEN or score >= SCORE_TO_STOP or len(birds) <= 0
+
+
+def bird_passed_pipe(bird_x: float, pipe_x: float) -> bool:
+    return bird_x > pipe_x
+
+
+def should_remove_pipe(pipe_x: float) -> bool:
+    return pipe_x + PIPE_TOP_IMG.get_width() < 0
+
+
+def should_jump(result: float) -> bool:
+    return result > 0.5
+
+
+def get_pipe_index(birds: List[Bird], pipes: List[Pipe]) -> int:
+    return (
+        1
+        if len(birds) > 0
+        and len(pipes) > 1
+        and birds[0].x > pipes[0].x + PIPE_TOP_IMG.get_width()
+        else 0
+    )
 
 
 if __name__ == "__main__":
